@@ -1,0 +1,59 @@
+version: '3.9'
+services:
+    app:
+        container_name: personal_accounting
+        tty: true
+        build:
+            context: ./docker/app
+            dockerfile: Dockerfile
+        volumes:
+            - '.:/var/www/html'
+        ports:
+            - '${APP_PORT:-8000}:8000'
+            - '${VITE_PORT:-15173}:5173'
+        depends_on:
+            - mariadb
+            - redis
+        networks:
+            - accounting
+    mariadb:
+        container_name: accounting_db
+        image: 'mariadb:10'
+        ports:
+            - '127.0.0.1:${EXTERNAL_DB_PORT:-13306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - 'accounting-mariadb:/var/lib/mysql/'
+        networks:
+            - accounting
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}" ]
+            retries: 3
+            timeout: 5s
+    redis:
+        container_name: accounting_redis
+        image: 'redis:alpine'
+        ports:
+            - '127.0.0.1:${EXTERNAL_REDIS_PORT:-16379}:6379'
+        volumes:
+            - 'accounting-redis:/data'
+        networks:
+            - accounting
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            retries: 3
+            timeout: 5s
+volumes:
+    accounting-mariadb:
+        driver: local
+    accounting-redis:
+        driver: local
+networks:
+    accounting:
+        driver: bridge
