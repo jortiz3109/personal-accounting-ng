@@ -6,7 +6,7 @@
             <div class="card-body">
                 <form method="POST">
                     @csrf
-                    <x-forms.input-email name="email" label="{{ trans('auth.fields.email.label') }}" value="{{ old('email') }}" required/>
+                    <x-forms.inputs.email name="email" label="{{ trans('auth.fields.email.label') }}" value="{{ old('email') }}" required/>
                     <x-forms.inputs.password name="password" label="{{ trans('auth.fields.password.label') }}" required/>
                     <button type="submit" class="btn btn-success">{{ trans('Login') }}</button>
                 </form>
