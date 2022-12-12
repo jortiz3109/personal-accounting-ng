@@ -9,8 +9,8 @@ services:
         volumes:
             - '.:/var/www/html'
         ports:
-            - '${APP_PORT:-8000}:8000'
-            - '${VITE_PORT:-15173}:5173'
+            - '${APP_PORT:-8000}:80/tcp'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}/tcp'
         depends_on:
             - mariadb
             - redis
@@ -56,4 +56,5 @@ volumes:
         driver: local
 networks:
     accounting:
+        enable_ipv6: false
         driver: bridge

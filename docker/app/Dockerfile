@@ -13,7 +13,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt update \
     && apt -y upgrade \
-    && apt install -y lsb-release ca-certificates apt-transport-https software-properties-common gnupg2 curl apt-utils
+    && apt install -y lsb-release ca-certificates apt-transport-https software-properties-common gnupg2 curl apt-utils gosu
 
 RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/sury-php.list \
     && curl -fsSL  https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/sury-keyring.gpg
@@ -34,9 +34,9 @@ RUN apt install -y mariadb-client supervisor\
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN useradd -u 1000 -d /home/app app
+RUN useradd -ms /bin/bash --no-user-group -u 1000 app
 RUN mkdir -p /home/app/.composer \
-    && chown -R app:app /home/app
+    && chown -R app /home/app/.composer
 
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -45,4 +45,5 @@ RUN chmod +x /usr/local/bin/start-container
 
 WORKDIR /var/www/html
 
+USER app
 ENTRYPOINT ["start-container"]
